@@ -152,16 +152,19 @@ void draw_food(const Vec2& location) {
 
 
 int main(){	
+    // ~~~~ Ncurses setup ~~~~
 	auto window = initscr();   // Start curses mode
     cbreak();                  // disable line buffering
     noecho();                  // Do not echo input to sceen
     nodelay(window, true);     // Prevents input functions from blocking (getch() and getstr())
+    curs_set(0);               // Hide the cursor
+    // ~~~~~~~~~~~~~~~~~~~~~~~
     srand(time(NULL));
 
     Snake snake;
     Vec2 food = random_food_location(snake);
 
-    constexpr float step_rate = 4.f;
+    constexpr float step_rate = 10.f;
     bool live = true;
     while(live) {
         if(snake.step() == Snake::collision) { 
@@ -175,14 +178,20 @@ int main(){
         snake.draw();
         draw_food(food);
         refresh();
-        char c = get_input();
+        const char c = getch();
         if(c) {
             snake.set_input(c);
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(int(1000.f / step_rate)));
     }
 
-    printw("game over");
+    std::this_thread::sleep_for(std::chrono::milliseconds(int(1000.f)));
+    const std::string game_over = "game over";
+    for(int i = 0; i < game_over.size(); ++i) {
+        mvaddch(0, i, game_over[i]);  
+    }
+    refresh();
+    std::this_thread::sleep_for(std::chrono::milliseconds(int(1000.f)));
 
 	endwin();			/* End curses mode		  */
 
